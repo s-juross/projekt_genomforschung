@@ -6,7 +6,7 @@ def harmonize_dataset(output_dir):
     ge = pd.read_csv("data/OmicsExpressionTPMLogp1HumanProteinCodingGenes.csv")
     metadata = pd.read_csv("data/Model.csv", usecols=['ModelID', 'COSMICID', 'SangerModelID', 'ModelIDAlias'])
     metadata.rename(columns={'SangerModelID': 'SANGER_MODEL_ID'}, inplace=True)
-    L1000 = pd.read_csv("data/L1000.txt")
+    L1000 = pd.read_csv("data/L1000.txt", sep='\t')
 
     # shrinking the dataset to the L1000 landmark genes
     ge_col2id = {}
@@ -19,9 +19,8 @@ def harmonize_dataset(output_dir):
     L1000_ids = set(pd.to_numeric(L1000['ID'], errors='coerce').dropna().astype(int))
     valid_ge_cols = [col for col, entrez in ge_col2id.items() if entrez in L1000_ids]
     # New dataframe containing only matching columns
-    ge_matched = ge[['SequencingID', 'ModelID', 'IsDefaultEntryForModel', 'ModelConditionID', 'IsDefaultEntryForMC'] + valid_ge_cols].copy()
+    ge_matched = ge[['SequencingID', 'ModelID'] + valid_ge_cols].copy()
     print(f"Selected {len(valid_ge_cols)} matching columns out of {len(ge.columns)} total ge columns and saving it in ge_matched.")
-    ge_matched.head()
 
     # Creating meta categories for cancer types so that the plots get more understandable
     category_map = {
@@ -85,11 +84,8 @@ def harmonize_dataset(output_dir):
     }
     # Anwendung auf den DataFrame
     df['META_CANCERTYPE'] = df['CANCER_TYPE'].map(category_map).fillna('Other')
-    ge_matched['META_CANCERTYPE'] = ge_matched['CANCER_TYPE'].map(category_map).fillna('Other')
 
     # big merge with complete drug data
-    # delete columns that we don't use
-    ge_matched = ge_matched.drop(columns=['IsDefaultEntryForModel', 'ModelConditionID', 'IsDefaultEntryForMC'])
     # filter for non-null SANGER_MODEL_ID and select only necessary columns for the merge
     mapping_bridge = metadata[['ModelID', 'SANGER_MODEL_ID']].dropna(subset=['SANGER_MODEL_ID'])
 
@@ -107,7 +103,9 @@ def harmonize_dataset(output_dir):
     else:
         ge_matched['CANCER_TYPE'] = 'Unknown'
         print("No matches found; CANCER_TYPE set to 'Unknown'.")
-
+        
+    # adding cancer category to ge_matched
+    ge_matched['META_CANCERTYPE'] = ge_matched['CANCER_TYPE'].map(category_map).fillna('Other')
     # Selection of relevant columns from drug dataframe (df): need id to merge + target values (labels)
     drug_data_cols = [
         'SANGER_MODEL_ID', 'DRUG_ID', 'DRUG_NAME', 
@@ -125,7 +123,7 @@ def harmonize_dataset(output_dir):
     print(f"Unique cell lines: {master_df['SANGER_MODEL_ID'].nunique()}")
 
     # save
-    master_df.to_pickle("harmonized_data.pkl", path=output_dir)
+    master_df.to_pickle("harmonized_data.pkl")
     # load
     #master_df = pd.read_pickle("data/harmonized_data.pkl", )
     return master_df

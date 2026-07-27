@@ -1,20 +1,23 @@
 from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem import ChemicalFeatures
+from rdkit.Chem import AllChem, ChemicalFeatures, rdFingerprintGenerator
 from rdkit import RDConfig
 import os
 import pandas as pd
 import numpy as np
 import pubchempy as pcp
+import time
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
+warnings.filterwarnings("ignore", category=Warning)
 
 def get_mfp(smiles):
     """
     Takes a SMILES string and returns a numpy array of the Morgan fingerprint (1024 bits).
     """
     try:
-        morganfp = AllChem.GetMorganFingerprintAsBitVect(Chem.MolFromSmiles(smiles),
-                                                         radius=2, nBits=1024)
-        return np.array(morganfp)
+        morganfp = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=1024)
+        mol = Chem.MolFromSmiles(smiles)
+        return np.array(morganfp.GetFingerprint(mol))
     except:
         return None
 
@@ -52,9 +55,9 @@ def smiles_to_morgan_columns(df, smiles_col='SMILES', n_bits=1024, radius=2):
     for mol in mols:
         if mol:
             # Generate the bit vector
-            bv = AllChem.GetMorganFingerprintAsBitVect(mol, radius=radius, nBits=n_bits)
+            morganfp = rdFingerprintGenerator.GetMorganGenerator(radius=radius, fpSize=n_bits)
             # Convert to list of 0s and 1s
-            fingerprints.append(list(bv))
+            fingerprints.append(list(morganfp.GetFingerprint(mol)))
         else:
             # Maintain row alignment with a list of zeros if SMILES was invalid
             fingerprints.append([0] * n_bits)
