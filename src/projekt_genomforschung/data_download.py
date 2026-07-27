@@ -24,14 +24,15 @@ def download_dataset():
         print("Download complete.")
 
     # get expression profiles from DepMap if necessary
-    url = "https://depmap.org/portal/data_page/?tab=allData&releasename=DepMap%20Public%2025Q3&filename=OmicsExpressionTPMLogp1HumanProteinCodingGenes.csv"
+    url = "https://depmap.org/portal/data_page/?tab=allData&releasename=DepMap%20Public%2026Q1&filename=OmicsExpressionTPMLogp1HumanProteinCodingGenes.csv"
     file_path = data_dir / "OmicsExpressionTPMLogp1HumanProteinCodingGenes.csv"
     if file_path.exists():
         print(f"{file_path.name} already exists. Skipping download.")
     else:
-        print(f"Downloading {file_path.name}...")
-        urlretrieve(url, file_path)
-        print("Download complete.")
+        raise FileNotFoundError(
+            f"{file_path.name} not found. Please download it on "
+            f"{url} and save it in /data."
+        )
 
     # get meta data from expression data
     url = "https://depmap.org/portal/data_page/?tab=allData&releasename=DepMap%20Public%2025Q3&filename=Model.csv"
@@ -39,13 +40,13 @@ def download_dataset():
     if file_path.exists():
         print(f"{file_path.name} already exists. Skipping download.")
     else:
-        print(f"Downloading {file_path.name}...")
-        urlretrieve(url, file_path)
-        print("Download complete.")
-
+        raise FileNotFoundError(
+                    f"{file_path.name} not found. Please download it on "
+                    f"{url} and save it in /data."
+                )
 
     # get L1000 landmark genes
-    url = "https://github.com/s-juross/projekt_genomforschung/blob/main/data/L1000.txt"
+    url = "https://raw.githubusercontent.com/s-juross/projekt_genomforschung/refs/heads/main/data/L1000.txt"
     file_path = data_dir / "L1000.txt"
     if file_path.exists():
         print(f"{file_path.name} already exists. Skipping download.")
