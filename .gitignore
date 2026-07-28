@@ -15,3 +15,4 @@ data/GDSC2_fitted_dose_response_27Oct23.xlsx
 data/OmicsExpressionTPMLogp1HumanProteinCodingGenes.csv
 GeAndCancertype.csv
 src/projekt_genomforschung/data/L1000.txt
+src/projekt_genomforschung/__pycache__/baseline_models.cpython-314.pyc

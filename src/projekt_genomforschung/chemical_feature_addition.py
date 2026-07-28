@@ -1,4 +1,4 @@
-from rdkit import Chem
+from rdkit import Chem, RDLogger
 from rdkit.Chem import AllChem, ChemicalFeatures, rdFingerprintGenerator
 from rdkit import RDConfig
 import os
@@ -9,6 +9,7 @@ import time
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 warnings.filterwarnings("ignore", category=Warning)
+RDLogger.DisableLog('rdApp.warning')
 
 def get_mfp(smiles):
     """
@@ -74,7 +75,6 @@ def smiles_to_morgan_columns(df, smiles_col='SMILES', n_bits=1024, radius=2):
     print("Fingerprints expanded into columns.")
     return result_df
 
-
 # Define the function to fetch SMILES via PubChem CID
 def fetch_smiles_by_cid(drug_id):
     try:
@@ -92,3 +92,15 @@ def fetch_smiles_by_cid(drug_id):
         # Print the exact ID that failed for easier debugging later
         print(f"Failed to fetch SMILES for CID {drug_id}. Reason: {e}")
         return None
+    
+# apply functions
+def get_smiles(master_df):
+    if "SMILES" not in master_df.columns:
+        unique_drugs_df = master_df[['DRUG_ID']].drop_duplicates().dropna()
+        unique_drugs_df['SMILES'] = unique_drugs_df['DRUG_ID'].apply(fetch_smiles_by_cid)
+        master_df = master_df.merge(unique_drugs_df, on='DRUG_ID', how='left')
+        missing_smiles = master_df['SMILES'].isna().sum()
+        print(f"Process complete. Rows with missing SMILES: {missing_smiles}")
+        return master_df
+    else:
+        print("SMILES already retrieved.")
