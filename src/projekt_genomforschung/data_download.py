@@ -54,3 +54,6 @@ def download_dataset():
         print(f"Downloading {file_path.name}...")
         urlretrieve(url, file_path)
         print("Download complete.")
+        
+def get_harmonized_dataset():
+    return pd.read_pickle("harmonized_data.pkl")
