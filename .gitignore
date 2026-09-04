@@ -16,3 +16,9 @@ data/OmicsExpressionTPMLogp1HumanProteinCodingGenes.csv
 GeAndCancertype.csv
 src/projekt_genomforschung/data/L1000.txt
 src/projekt_genomforschung/__pycache__/baseline_models.cpython-314.pyc
+best_model_seed_9999.pt
+best_model_seed_6726.pt
+best_model_seed_1337.pt
+best_model_seed_101.pt
+best_model_seed_42.pt
+best_grounded_model.pt
